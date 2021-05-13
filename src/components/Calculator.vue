@@ -1,12 +1,15 @@
 <template>
   <div class="hello">
     <h1> Calculator </h1>
-    <input type="number" v-model.trim.number="num1"/>&nbsp;
-    <input type="number" v-model.trim.number="num2"/>
+    <input type="number" v-model.number="num1"/>&nbsp;
+    <input type="number" v-model.number="num2"/>
     = {{ result }}
-    <div>
+    <div class="error" v-if="error">
+        {{ error }}
+      </div>
+    <div class="operations">
       Choose an operation:
-      <div class="operations">
+      <div>
         <button v-for="action in operations" :key="action.operation" @click="calculate(action.operation)"> {{ action.sign }} </button>
       </div>
     </div>
@@ -47,7 +50,8 @@ export default {
     showKeyboard: true,
     buttons: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
     operations: [{ operation: 'add', sign: '+' }, { operation: 'subtract', sign: '-' }, { operation: 'multiply', sign: '*' }, { operation: 'devide', sign: '/' }, { operation: 'modulus', sign: '%' }, { operation: 'power', sign: 'x^y' }],
-    operandChosend: 1
+    operandChosend: 1,
+    error: ''
   }),
   methods: {
     eraseDigitClickHandler () {
@@ -68,14 +72,20 @@ export default {
     },
     calculate (op) {
       const { num1, num2 } = this
+      this.error = ''
 
       const operationsMapping = {
-        add: () => +num1 + +num2,
-        subtract: () => +num1 - +num2,
-        multiply: () => +num1 * +num2,
-        devide: () => +num1 / +num2,
-        modulus: () => +num1 % +num2,
-        power: () => Math.pow(+num1, +num2)
+        add: () => num1 + num2,
+        subtract: () => num1 - num2,
+        multiply: () => num1 * num2,
+        devide: () => {
+          if (num2 === 0) {
+            this.error = 'Cannot devide by zero'
+          }
+          return num1 / num2
+        },
+        modulus: () => num1 % num2,
+        power: () => Math.pow(num1, num2)
       }
 
       this.result = operationsMapping[op]()
@@ -99,5 +109,10 @@ li {
 }
 a {
   color: #42b983;
+}
+
+.error {
+  padding: 1px;
+  border: 1px solid red;
 }
 </style>
