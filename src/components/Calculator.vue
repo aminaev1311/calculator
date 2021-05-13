@@ -1,8 +1,8 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <input v-model.number="num1"/>&nbsp;
-    <input v-model.number="num2"/>
+    <h1> Calculator </h1>
+    <input type="number" v-model.trim.number="num1"/>&nbsp;
+    <input type="number" v-model.trim.number="num2"/>
     = {{ result }}
     <div>
       Choose an operation:
