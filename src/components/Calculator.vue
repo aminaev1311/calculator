@@ -6,7 +6,16 @@
     = {{ result }}
     <div class="error" v-if="error">
         {{ error }}
-      </div>
+    </div>
+    <div class="vIfExamples">
+      <div v-if="result<0">The result is negative</div>
+      <div v-else-if="result<1000">The result is less than 1000</div>
+      <div v-else-if="result>=1000">The result is equal to or greater than 1000</div>
+      <div v-else>The result is error</div>
+    </div>
+    <div class="logs" v-for="log in logs" :key="log[key]">
+      {{ log }}
+    </div>
     <div class="operations">
       Choose an operation:
       <div>
@@ -38,6 +47,8 @@
 </template>
 
 <script>
+import Vue from 'vue'
+
 export default {
   name: 'Calculator',
   props: {
@@ -51,7 +62,9 @@ export default {
     buttons: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
     operations: [{ operation: 'add', sign: '+' }, { operation: 'subtract', sign: '-' }, { operation: 'multiply', sign: '*' }, { operation: 'devide', sign: '/' }, { operation: 'modulus', sign: '%' }, { operation: 'power', sign: 'x^y' }],
     operandChosend: 1,
-    error: ''
+    error: '',
+    log: null,
+    logs: {}
   }),
   methods: {
     eraseDigitClickHandler () {
@@ -89,6 +102,9 @@ export default {
       }
 
       this.result = operationsMapping[op]()
+
+      // this.logs[Date.now()] = `${num1} ${op} ${num2} = ${this.result}`
+      Vue.set(this.logs, Date.now(), `${num1} ${op} ${num2} = ${this.result}`)
     }
   }
 }
