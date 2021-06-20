@@ -1,25 +1,21 @@
 <template>
   <div class="hello">
     <h1> Calculator </h1>
-    <input type="number" v-model.number="num1"/>&nbsp;
-    <input type="number" v-model.number="num2"/>
+    <input type="number" v-model.number="num1" name="num1"/>&nbsp;
+    <input type="number" v-model.number="num2" name="num2"/>
     = {{ result }}
     <div class="error" v-if="error">
         {{ error }}
     </div>
-    <div class="vIfExamples">
-      <div v-if="result<0">The result is negative</div>
-      <div v-else-if="result<1000">The result is less than 1000</div>
-      <div v-else-if="result>=1000">The result is equal to or greater than 1000</div>
-      <div v-else>The result is error</div>
-    </div>
-    <div class="logs" v-for="log in logs" :key="log[key]">
-      {{ log }}
-    </div>
     <div class="operations">
       Choose an operation:
       <div>
-        <button v-for="action in operations" :key="action.operation" @click="calculate(action.operation)"> {{ action.sign }} </button>
+        <button
+          v-for="action in operations"
+          :key="action.operation"
+          @click="calculate(action.operation)"
+          :name="action.operation"
+        > {{ action.sign }} </button>
       </div>
     </div>
     <div class="keyboard">
@@ -28,18 +24,27 @@
         Show Keyboard
       </label>
       <div class="buttons" v-if="showKeyboard">
-        <button v-for="(button,idx) in buttons" :key="idx" @click="buttonClickHandler(+button)" :data-num="+button"> {{ button }} </button>
-
-        <button @click="eraseDigitClickHandler">&lt;--</button>
+        <button
+          v-for="(button,idx) in buttons"
+          :key="idx" @click="buttonClickHandler(+button.value)"
+          :data-num="+button"
+          :name="button.name"
+          :class="button.name"
+        > {{ button.value }} </button>
+        <button @click="eraseDigitClickHandler"
+        name="eraseDigit"
+        >&lt;--</button>
       </div>
     </div>
     <div class="operands">
       <label>
-        <input type="radio" id="one" :value='+1' v-model="operandChosend">
+        <input type="radio" id="one" name="one" :value='+1' v-model="operandChosend">
         Operand 1
       </label>
       <label>
-        <input type="radio" id="two" :value='+2' v-model="operandChosend">
+        <input type="radio" id="two" :value='+2'
+        name="two"
+        v-model="operandChosend">
         Operand 2
       </label>
     </div>
@@ -51,16 +56,31 @@ import Vue from 'vue'
 
 export default {
   name: 'Calculator',
-  props: {
-    msg: String
-  },
   data: () => ({
-    num1: '',
-    num2: '',
-    result: 0,
+    num1: null,
+    num2: null,
+    result: null,
     showKeyboard: true,
-    buttons: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    operations: [{ operation: 'add', sign: '+' }, { operation: 'subtract', sign: '-' }, { operation: 'multiply', sign: '*' }, { operation: 'devide', sign: '/' }, { operation: 'modulus', sign: '%' }, { operation: 'power', sign: 'x^y' }],
+    buttons: [
+      { value: 0, name: 'zero' },
+      { value: 1, name: 'one' },
+      { value: 2, name: 'two' },
+      { value: 3, name: 'three' },
+      { value: 4, name: 'four' },
+      { value: 5, name: 'five' },
+      { value: 6, name: 'six' },
+      { value: 7, name: 'seven' },
+      { value: 8, name: 'eight' },
+      { value: 9, name: 'nine' }
+    ],
+    operations: [
+      { operation: 'add', sign: '+' },
+      { operation: 'subtract', sign: '-' },
+      { operation: 'multiply', sign: '*' },
+      { operation: 'devide', sign: '/' },
+      { operation: 'modulus', sign: '%' },
+      { operation: 'power', sign: 'x^y' }
+    ],
     operandChosend: 1,
     error: '',
     log: null,
@@ -68,37 +88,28 @@ export default {
   }),
   methods: {
     eraseDigitClickHandler () {
-      // if (this.operandChosend === 1) {
-      //   this.num1 = this.num1.slice(0, this.num1.length - 1)
-      // } else {
-      //   this.num2 = this.num2.slice(0, this.num2.length - 1)
-      // }
-      this.operandChosend === 1 ? this.num1 = this.num1.slice(0, this.num1.length - 1) : this.num2.slice(0, this.num2.length - 1)
+      this.operandChosend === 1 ? this.num1 = Math.trunc(this.num1 / 10) : this.num2 = Math.trunc(this.num2 / 10)
     },
     buttonClickHandler (num) {
-      // if (this.operandChosend === 1) {
-      //   this.num1 += num
-      // } else {
-      //   this.num2 += num
-      // }
-      this.operandChosend === 1 ? this.num1 += num : this.num2 += num
+      this.operandChosend === 1 ? this.num1 = this.num1 * 10 + num : this.num2 = this.num2 * 10 + num
     },
     calculate (op) {
       const { num1, num2 } = this
       this.error = ''
 
       const operationsMapping = {
-        add: () => num1 + num2,
-        subtract: () => num1 - num2,
-        multiply: () => num1 * num2,
+        add: () => +num1 + +num2,
+        subtract: () => +num1 - +num2,
+        multiply: () => +num1 * +num2,
         devide: () => {
-          if (num2 === 0) {
+          if (+num2 === 0) {
             this.error = 'Cannot devide by zero'
+            return null
           }
-          return num1 / num2
+          return +num1 / +num2
         },
-        modulus: () => num1 % num2,
-        power: () => Math.pow(num1, num2)
+        modulus: () => +num1 % +num2,
+        power: () => Math.pow(+num1, +num2)
       }
 
       this.result = operationsMapping[op]()
